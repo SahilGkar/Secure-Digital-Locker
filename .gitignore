@@ -1,0 +1,50 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Instance directory (local databases, RSA runtime keys)
+instance/*.db
+instance/*.db-journal
+instance/keys/*.pem
+instance/keys/
+instance/
+
+# Encrypted file blobs
+storage/blobs/*.enc
+!storage/blobs/.gitkeep
+
+# TLS certificates and RSA key pairs
+certs/*.pem
+*.pem
+
+# Environment variables
+.env
+.env.*
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Packaging & Distribution
+dist/
+build/
+*.egg-info/

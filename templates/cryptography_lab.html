@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Cryptography Lab - Secure Digital Locker{% endblock %}
+
+{% block content %}
+<div class="crypto-lab-page">
+    <div class="page-header">
+        <h2>🧪 Cryptography Laboratory</h2>
+        <p class="subtitle">Interactive educational experiments demonstrating real AES-256-GCM and RSA-OAEP operations on temporary in-memory copies.</p>
+    </div>
+
+    <!-- Security Guarantee Banner -->
+    <div class="alert alert-info lab-banner">
+        <strong>🛡️ In-Memory Isolation:</strong> All experiments operate strictly on temporary in-memory copies. Your real stored encrypted document (<code>.enc</code>) on disk is never modified, overwritten, or exposed.
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- DOCUMENT SELECTOR                                       -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="crypto-card">
+        <h3>1. Select Document for Experiment</h3>
+        {% if documents %}
+        <div class="doc-selector-container">
+            <div class="form-group">
+                <label for="doc-select"><strong>Choose an encrypted locker document:</strong></label>
+                <select id="doc-select" class="form-control doc-dropdown" onchange="window.location.href='{{ url_for('documents.cryptography_lab') }}?doc_id=' + this.value;">
+                    {% for doc in documents %}
+                    <option value="{{ doc.id }}" {% if selected_doc and selected_doc.id == doc.id %}selected{% endif %}>
+                        {{ doc.original_filename }} — {{ doc.document_type or 'General Document' }} ({{ (doc.file_size / 1024)|round(1) }} KB)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if selected_doc %}
+            <div class="selected-doc-card" id="selected-doc-info" data-doc-id="{{ selected_doc.id }}">
+                <div class="doc-meta-grid">
+                    <div><strong>Selected Document:</strong> <span id="doc-name">{{ selected_doc.original_filename }}</span></div>
+                    <div><strong>Document Type:</strong> <span id="doc-type">{{ selected_doc.document_type or 'General Document' }}</span></div>
+                    <div><strong>Original Size:</strong> <span id="doc-size">{{ (selected_doc.file_size / 1024)|round(1) }} KB ({{ selected_doc.file_size }} bytes)</span></div>
+                    <div><strong>Storage Status:</strong> <span class="badge badge-success">Encrypted (.enc)</span></div>
+                </div>
+            </div>
+
+            <!-- PIN Access Authentication Box -->
+            <div class="lab-auth-box" id="lab-auth-container">
+                <h4>🔐 Locker PIN Authentication Required</h4>
+                <p>To safely prepare the temporary in-memory laboratory copy, enter your 6-digit Locker PIN:</p>
+                <div class="pin-inline-form">
+                    <input type="password" id="lab-pin-input" class="pin-input" placeholder="6-digit PIN" maxlength="6" pattern="[0-9]{6}" autocomplete="off">
+                    <button type="button" id="btn-init-lab" class="btn btn-primary">Start Experiment</button>
+                </div>
+                <div id="pin-error-msg" class="text-error" style="display:none; margin-top: 8px;"></div>
+            </div>
+
+            <div id="lab-active-session-indicator" class="lab-session-badge" style="display:none;">
+                <span class="badge badge-success">✓ Lab Session Active</span>
+                <span class="session-text">Working on in-memory copy of <strong id="active-filename">{{ selected_doc.original_filename }}</strong></span>
+                <button type="button" id="btn-reset-lab" class="btn btn-secondary btn-sm" style="margin-left: 15px;">Reset &amp; Discard Lab State</button>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="no-docs-prompt">
+            <p>No documents found in your locker. Upload a document on the <a href="{{ url_for('documents.dashboard') }}">Dashboard</a> first to experiment in the lab.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Active Experiments Container (Hidden until PIN is authenticated) -->
+    <div id="experiments-container" style="display:none;">
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- EXPERIMENT 1: ENCRYPTION & DECRYPTION DEMONSTRATION     -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <div class="crypto-card experiment-card" id="exp1-card">
+            <div class="exp-header">
+                <h3>EXPERIMENT 1: Encryption &amp; Decryption Demonstration</h3>
+                <div class="mode-toggles">
+                    <button type="button" id="mode-normal-btn" class="btn btn-sm btn-toggle active">Normal Mode</button>
+                    <button type="button" id="mode-step-btn" class="btn btn-sm btn-toggle">🎓 Step-by-Step Demo Mode</button>
+                </div>
+            </div>
+
+            <!-- NORMAL MODE VIEW -->
+            <div id="view-normal-mode">
+                <p>Execute the complete cryptographic pipeline on the temporary in-memory copy: fresh AES-256 key generation, AES-256-GCM encryption, RSA-OAEP key protection, and GCM authenticated decryption.</p>
+                <div class="exp-actions">
+                    <button type="button" id="btn-run-normal" class="btn btn-primary">▶ Run Cryptographic Round-Trip</button>
+                </div>
+                
+                <div id="normal-results" class="results-panel" style="display:none;">
+                    <h4>Execution Progress &amp; Cryptographic Verification:</h4>
+                    <ul class="step-log-list" id="normal-steps-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                    <div id="normal-final-status" class="final-status-callout" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- STEP-BY-STEP MODE VIEW -->
+            <div id="view-step-mode" style="display:none;">
+                <p>Observe each stage of the cryptographic operation individually. Each click on <strong>Next Step</strong> executes the corresponding real cryptographic operation in memory.</p>
+                
+                <div class="step-progress-indicator">
+                    <span id="step-counter" class="step-badge">STEP 1 / 7</span>
+                    <h4 id="step-title">Original Document</h4>
+                </div>
+
+                <div class="step-card-content" id="step-content-area">
+                    <!-- Populated dynamically per step -->
+                </div>
+
+                <div class="step-nav-actions">
+                    <button type="button" id="btn-next-step" class="btn btn-primary">Next Step →</button>
+                    <button type="button" id="btn-restart-step" class="btn btn-secondary" style="display:none;">Restart Experiment</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- EXPERIMENT 2: AES-GCM TAMPER DETECTION                  -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <div class="crypto-card experiment-card" id="exp2-card">
+            <div class="exp-header">
+                <h3>EXPERIMENT 2: Interactive AES-GCM Tamper Detection</h3>
+            </div>
+            <p>
+                AES-256-GCM computes a 16-byte authentication tag over the ciphertext and nonce. If even a single byte is altered, AES-GCM authentication fails immediately and rejects the corrupted document.
+            </p>
+
+            <div class="tamper-lab-workspace">
+                <!-- Hex Ciphertext Inspector -->
+                <div class="hex-viewer-section">
+                    <div class="hex-header">
+                        <h4>Laboratory Ciphertext (Actual AES-256-GCM Encrypted Bytes)</h4>
+                        <span class="hex-hint">Click any byte below to select and modify it:</span>
+                    </div>
+                    <div class="hex-grid-wrapper">
+                        <table class="hex-table" id="hex-table">
+                            <thead>
+                                <tr>
+                                    <th>Offset</th>
+                                    <th colspan="8">Hex Bytes (In-Memory Ciphertext)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hex-tbody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Byte Editing Panel -->
+                <div class="byte-editor-panel">
+                    <h4>Byte Inspector &amp; Tamper Control</h4>
+                    <div class="selected-byte-details">
+                        <div class="editor-row">
+                            <span class="editor-label">Selected Offset:</span>
+                            <span class="editor-val" id="disp-offset">—</span>
+                        </div>
+                        <div class="editor-row">
+                            <span class="editor-label">Original Value:</span>
+                            <span class="editor-val" id="disp-orig-val">—</span>
+                        </div>
+                        <div class="editor-row">
+                            <span class="editor-label">Current Value:</span>
+                            <span class="editor-val" id="disp-curr-val">—</span>
+                        </div>
+                    </div>
+
+                    <div class="editor-form">
+                        <label for="new-byte-input"><strong>New Hex Value (2 chars, e.g. 7B, 00, FF):</strong></label>
+                        <div class="hex-input-group">
+                            <input type="text" id="new-byte-input" maxlength="2" placeholder="Hex" class="form-control hex-input" autocomplete="off">
+                            <button type="button" id="btn-modify-byte" class="btn btn-warning" disabled>Modify Byte</button>
+                        </div>
+                        <div id="byte-input-error" class="text-error" style="display:none;"></div>
+                    </div>
+
+                    <div class="tamper-action-buttons">
+                        <button type="button" id="btn-test-decrypt" class="btn btn-primary">🔍 Test Decryption</button>
+                        <button type="button" id="btn-restore-byte" class="btn btn-secondary">Restore Original</button>
+                    </div>
+
+                    <!-- Decryption Test Result Display -->
+                    <div id="decryption-test-result" class="decryption-result-box" style="display:none;">
+                        <div id="decryption-status-icon" class="status-icon"></div>
+                        <div id="decryption-status-text" class="status-text"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/crypto_lab.js') }}"></script>
+{% endblock %}

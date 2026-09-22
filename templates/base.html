@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Secure Digital Locker{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Secure Digital Locker</h1>
+            {% if session.username %}
+            <nav class="main-nav">
+                <span class="user-greeting">Welcome, {{ session.username }}</span>
+                <a href="{{ url_for('documents.dashboard') }}" class="nav-tab {% if active_tab == 'dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('documents.how_it_works') }}" class="nav-tab {% if active_tab == 'how_it_works' %}active{% endif %}">How It Works</a>
+                <a href="{{ url_for('documents.cryptography_lab') }}" class="nav-tab {% if active_tab == 'cryptography_lab' %}active{% endif %}">Cryptography Lab</a>
+                <a href="{{ url_for('auth.logout') }}" class="nav-tab logout-link">Logout</a>
+            </nav>
+            {% endif %}
+        </header>
+        
+        <main>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </main>
+        
+        <footer>
+            <p>BSc AI Semester 3 - Cryptography Project</p>
+        </footer>
+    </div>
+    <script src="{{ url_for('static', filename='js/scroll_restore.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

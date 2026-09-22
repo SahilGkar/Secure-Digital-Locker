@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Secure Digital Locker{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h2>Your Documents</h2>
+    </div>
+    
+
+    {% if last_encryption %}
+        {% include "encryption_complete.html" %}
+    {% endif %}
+
+    <div class="upload-form">
+        <h3>Upload New Document</h3>
+        <form method="POST" action="{{ url_for('documents.upload') }}" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Select File</label>
+                <input type="file" id="file" name="file" required>
+            </div>
+            <div class="form-group">
+                <label for="document_type">Document Type</label>
+                <input type="text" id="document_type" name="document_type" placeholder="e.g. Medical Form, ID Card, Certificate">
+            </div>
+            <p class="form-hint">Encrypted with AES-256-GCM and key protected by RSA-OAEP.</p>
+            <button type="submit" class="btn btn-primary">Upload &amp; Encrypt</button>
+        </form>
+    </div>
+
+    <div class="search-form">
+        <form method="GET" action="{{ url_for('documents.dashboard') }}">
+            <div class="search-input-group">
+                <input type="text" name="search" placeholder="Search by document type..." value="{{ search_query }}" class="search-input">
+                <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                {% if search_query %}
+                    <a href="{{ url_for('documents.dashboard') }}" class="btn btn-secondary btn-sm">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    {% if documents %}
+    <div class="documents-table-container">
+        <table class="documents-table">
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Document Type</th>
+                    <th>Size</th>
+                    <th>Uploaded</th>
+                    <th>Encryption</th>
+                    <th>Key Protection</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr>
+                    <td>{{ doc.original_filename }}</td>
+                    <td>{{ doc.document_type or '—' }}</td>
+                    <td>{{ (doc.file_size / 1024)|round(1) }} KB</td>
+                    <td>{{ doc.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td><span class="badge badge-crypto">AES-256-GCM</span></td>
+                    <td><span class="badge badge-crypto">RSA-OAEP</span></td>
+                    <td><span class="badge badge-success">Encrypted</span></td>
+                    <td class="actions">
+                        <a href="{{ url_for('documents.security_details', doc_id=doc.id) }}" class="btn btn-security btn-sm" title="Security Details">🔐 Security Details</a>
+                        <a href="{{ url_for('documents.access', doc_id=doc.id, action='view') }}" class="btn btn-secondary btn-sm">View</a>
+                        <a href="{{ url_for('documents.access', doc_id=doc.id, action='download') }}" class="btn btn-primary btn-sm">Download</a>
+                        <form method="POST" action="{{ url_for('documents.delete', doc_id=doc.id) }}" class="inline-form" onsubmit="return confirm('Delete this document?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="no-documents">No documents uploaded yet. Use the form above to upload your first encrypted document.</p>
+    {% endif %}
+</div>
+{% endblock %}

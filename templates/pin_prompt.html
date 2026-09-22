@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Enter Locker PIN - Secure Digital Locker{% endblock %}
+
+{% block content %}
+<div class="form-container pin-prompt-container">
+    <h2>6-Digit Locker PIN Required</h2>
+    <p class="pin-prompt-message">
+        To {{ action }} <strong>{{ document.original_filename }}</strong>, please enter your 6-digit Locker PIN.
+    </p>
+    <p class="pin-prompt-hint">This PIN protects access to document operations.</p>
+    
+    <form method="POST" action="{{ url_for('documents.access', doc_id=document.id) }}">
+        <input type="hidden" name="action" value="{{ action }}">
+        <div class="form-group">
+            <label for="pin">Locker PIN</label>
+            <input type="password" id="pin" name="pin" required pattern="[0-9]{6}" minlength="6" maxlength="6" inputmode="numeric" autocomplete="off" autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary">Verify & Continue</button>
+    </form>
+    
+    <p class="form-link">
+        <a href="{{ url_for('documents.dashboard') }}">Cancel</a>
+    </p>
+</div>
+{% endblock %}

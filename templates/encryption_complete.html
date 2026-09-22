@@ -1,0 +1,57 @@
+{# Included in dashboard.html when last_encryption data is available #}
+<div class="encryption-complete">
+    <div class="encryption-complete-header">
+        <span class="encryption-complete-icon">🔐</span>
+        <h3>ENCRYPTION COMPLETE ✓</h3>
+    </div>
+    <div class="encryption-complete-body">
+        <div class="encryption-pipeline-status">
+            <div class="pipeline-step step-ok">
+                <span class="step-icon">✓</span>
+                <span>Original document received: <strong>{{ last_encryption.filename }}</strong></span>
+            </div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-step step-ok">
+                <span class="step-icon">✓</span>
+                <span>Random 256-bit AES key generated</span>
+            </div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-step step-ok">
+                <span class="step-icon">✓</span>
+                <span>AES-256-GCM encryption completed</span>
+            </div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-step step-ok">
+                <span class="step-icon">✓</span>
+                <span>GCM nonce generated ({{ last_encryption.nonce_len }} bytes)</span>
+            </div>
+            <div class="pipeline-step step-ok">
+                <span class="step-icon">✓</span>
+                <span>GCM authentication tag generated ({{ last_encryption.tag_len }} bytes)</span>
+            </div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-step step-ok">
+                <span class="step-icon">✓</span>
+                <span>AES key protected using RSA-OAEP
+                    {% if last_encryption.rsa_key_size %}
+                        (RSA-{{ last_encryption.rsa_key_size }})
+                    {% endif %}
+                    — encrypted key: {{ last_encryption.encrypted_key_len }} bytes
+                </span>
+            </div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-step step-ok">
+                <span class="step-icon">✓</span>
+                <span>Encrypted ciphertext stored as <code>{{ last_encryption.storage_filename }}</code></span>
+            </div>
+        </div>
+        <div class="encryption-complete-summary">
+            <table class="encryption-summary-table">
+                <tr><td>Original size:</td><td>{{ (last_encryption.original_size / 1024)|round(1) }} KB</td></tr>
+                <tr><td>Ciphertext size:</td><td>{{ (last_encryption.ciphertext_size / 1024)|round(1) }} KB</td></tr>
+                <tr><td>Document type:</td><td>{{ last_encryption.document_type }}</td></tr>
+            </table>
+            <p class="encryption-complete-status"><strong>Status: DOCUMENT ENCRYPTED ✓</strong></p>
+        </div>
+    </div>
+</div>

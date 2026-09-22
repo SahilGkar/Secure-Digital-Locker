@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}How It Works - Cryptographic Architecture - Secure Digital Locker{% endblock %}
+
+{% block content %}
+<div class="how-it-works-page">
+    <div class="page-header">
+        <h2>🛡️ How It Works: Cryptographic Architecture</h2>
+        <p class="subtitle">An educational guide to the hybrid encryption architecture used in Secure Digital Locker.</p>
+    </div>
+
+    <!-- 1. Hybrid Encryption Overview -->
+    <div class="crypto-card">
+        <h3>1. Hybrid Encryption</h3>
+        <p>
+            Secure Digital Locker combines symmetric encryption (<strong>AES-256-GCM</strong>) and asymmetric encryption (<strong>RSA-OAEP</strong>) into a <strong>hybrid cryptosystem</strong>.
+        </p>
+        <div class="two-col-grid">
+            <div class="info-box">
+                <h4>Why Symmetric Encryption for the Document?</h4>
+                <p>
+                    Symmetric ciphers like AES are exceptionally fast, computationally lightweight, and designed to encrypt data of any size (from small text files to large media) efficiently without ciphertext expansion.
+                </p>
+            </div>
+            <div class="info-box">
+                <h4>Why Asymmetric Encryption for Key Protection?</h4>
+                <p>
+                    Asymmetric cryptography solves the key distribution problem. Instead of storing or sharing the symmetric key directly, the system protects the AES key using the locker's public key. Only someone with the corresponding private key can recover it.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Core Cryptographic Components -->
+    <div class="crypto-card">
+        <h3>2. Core Cryptographic Components</h3>
+        <div class="components-grid">
+            <div class="component-item">
+                <span class="component-badge">AES-256-GCM</span>
+                <h4>Authenticated Encryption</h4>
+                <p>Advanced Encryption Standard operating in Galois/Counter Mode (GCM). It provides both <strong>confidentiality</strong> (encryption) and <strong>integrity / authenticity</strong> (tamper detection) simultaneously.</p>
+            </div>
+            <div class="component-item">
+                <span class="component-badge">Random AES Key</span>
+                <h4>256-bit Document Key</h4>
+                <p>A fresh 256-bit (32-byte) key is generated independently for each document using a cryptographically secure pseudo-random number generator (CSPRNG). Keys are never reused between files.</p>
+            </div>
+            <div class="component-item">
+                <span class="component-badge">GCM Nonce</span>
+                <h4>12-byte Initialization Vector</h4>
+                <p>A unique 12-byte (96-bit) nonce (number used once) generated per encryption. The nonce ensures that encrypting identical documents produces completely distinct ciphertexts.</p>
+            </div>
+            <div class="component-item">
+                <span class="component-badge">Authentication Tag</span>
+                <h4>16-byte GMAC Tag</h4>
+                <p>A 16-byte cryptographic checksum computed by AES-GCM over the ciphertext and nonce. It proves the ciphertext was created with the authentic key and has not been altered.</p>
+            </div>
+            <div class="component-item">
+                <span class="component-badge">RSA-OAEP</span>
+                <h4>Asymmetric Key Wrapping</h4>
+                <p>RSA-OAEP is used to securely protect the random AES-256 document key. The RSA public key is used for protection, and the corresponding private key is required to recover the AES key.</p>
+            </div>
+            <div class="component-item">
+                <span class="component-badge">RSA Key Pair</span>
+                <h4>Public &amp; Private Keys</h4>
+                <p>The locker maintains an RSA key pair{% if rsa_key_size %} ({{ rsa_key_size }}-bit){% endif %}. The public key encrypts the AES document key during upload. The private key decrypts the AES key during download.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Encryption Flow Diagram -->
+    <div class="crypto-card">
+        <h3>3. Encryption Flow (Upload)</h3>
+        <p>When you upload a document, the locker performs hybrid encryption through these distinct stages:</p>
+        <div class="pipeline-diagram">
+<pre>
+                 ORIGINAL DOCUMENT
+                         │
+                         ▼
+                 Random AES-256 Key
+                         │
+                         ▼
+                    AES-256-GCM
+                         │
+              ┌──────────┼──────────┐
+              │          │          │
+              ▼          ▼          ▼
+         Ciphertext    Nonce    Auth Tag
+              │
+              ▼
+       ENCRYPTED DOCUMENT (.enc on disk)
+
+
+                 AES-256 KEY
+                      │
+                      ▼
+                  RSA-OAEP
+                      │
+                      ▼
+             ENCRYPTED AES KEY (stored in database)
+</pre>
+        </div>
+        <ol class="flow-steps">
+            <li><strong>Key Generation:</strong> The server generates a fresh 256-bit AES key using a cryptographically secure random number generator.</li>
+            <li><strong>Document Encryption:</strong> AES-256-GCM encrypts the document, creating the ciphertext, a 12-byte nonce, and a 16-byte authentication tag.</li>
+            <li><strong>Key Protection:</strong> The locker's RSA public key encrypts the AES key using RSA-OAEP.</li>
+            <li><strong>Storage:</strong> Only the encrypted ciphertext is saved to disk (<code>.enc</code>). The nonce, authentication tag, and encrypted AES key are stored in the database. The raw AES key is immediately cleared from memory.</li>
+        </ol>
+    </div>
+
+    <!-- 4. Decryption Flow Diagram -->
+    <div class="crypto-card">
+        <h3>4. Decryption Flow (View &amp; Download)</h3>
+        <p>When an authorized user with the correct 6-digit Locker PIN accesses a document, the reverse process executes:</p>
+        <div class="pipeline-diagram">
+<pre>
+             ENCRYPTED AES KEY
+                      │
+                      ▼
+                   RSA-OAEP
+             (using RSA Private Key)
+                      │
+                      ▼
+                 AES-256 KEY
+                      │
+                      │
+                      ▼
+             ENCRYPTED DOCUMENT + Nonce + Auth Tag
+                      │
+                      ▼
+                 AES-256-GCM
+                      │
+            ┌─────────┴─────────┐
+            ▼                   ▼
+    Verify Auth Tag      Original Document
+       (GMAC check)             │
+            │                   ▼
+   ✓ Untampered: Accept   SERVED TO USER
+   ✗ Modified: Reject
+</pre>
+        </div>
+        <ol class="flow-steps">
+            <li><strong>Access Control:</strong> The user enters their 6-digit Locker PIN, which verifies authorization before cryptographic operations begin.</li>
+            <li><strong>Key Recovery:</strong> The locker's RSA private key decrypts the encrypted AES key using RSA-OAEP.</li>
+            <li><strong>Document Decryption:</strong> AES-256-GCM decrypts the ciphertext using the recovered AES key, the 12-byte nonce, and the 16-byte authentication tag.</li>
+            <li><strong>Integrity Check:</strong> AES-GCM verifies that the authentication tag matches the ciphertext. If any bit was modified, decryption halts immediately.</li>
+            <li><strong>Delivery:</strong> The decrypted document is served to the user in-memory. Decrypted plaintext is never saved permanently to disk.</li>
+        </ol>
+    </div>
+
+    <!-- 5. Tamper Detection Mechanism -->
+    <div class="crypto-card">
+        <h3>5. How AES-GCM Detects Tampering</h3>
+        <p>
+            Standard ciphers (like AES in CBC or CTR mode) only provide confidentiality — they do not inherently detect if an attacker changed bytes in the encrypted file.
+            AES-GCM solves this by computing a <strong>Galois Message Authentication Code (GMAC)</strong>:
+        </p>
+        <div class="alert alert-info">
+            <strong>The Authentication Tag:</strong> During encryption, AES-GCM evaluates an algebraic polynomial over Galois Field GF(2<sup>128</sup>) using the ciphertext and nonce.
+            Even if an attacker changes a single byte or single bit of the ciphertext, the computed authentication tag will no longer match the stored tag, causing AES-GCM decryption to fail immediately and reject the corrupted data.
+        </div>
+        <div class="lab-link-card">
+            <h4>🧪 See it in action in the Cryptography Lab</h4>
+            <p>You can interactively modify bytes of ciphertext and observe AES-GCM detect tampering in real time.</p>
+            <a href="{{ url_for('documents.cryptography_lab') }}" class="btn btn-primary">Open Cryptography Lab →</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

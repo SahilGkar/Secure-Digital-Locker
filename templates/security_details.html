@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Security Details - {{ document.original_filename }} - Secure Digital Locker{% endblock %}
+
+{% block content %}
+<div class="security-details">
+    <div class="security-details-header">
+        <h2>🔐 Security Details: {{ document.original_filename }}</h2>
+        <a href="{{ url_for('documents.dashboard') }}" class="btn btn-secondary btn-sm">← Back to Dashboard</a>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- DOCUMENT INFORMATION                                    -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="crypto-card">
+        <h3>Document Information</h3>
+        <div class="crypto-metadata">
+            <div class="meta-row">
+                <span class="meta-label">Filename:</span>
+                <span class="meta-value">{{ document.original_filename }}</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Document Type:</span>
+                <span class="meta-value">{{ document.document_type or 'Not specified' }}</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Original Size:</span>
+                <span class="meta-value">{{ (document.file_size / 1024)|round(1) }} KB ({{ document.file_size }} bytes)</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Uploaded:</span>
+                <span class="meta-value">{{ document.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Status:</span>
+                <span class="meta-value">
+                    <span class="badge badge-success">Encrypted</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- ENCRYPTION METADATA                                     -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="crypto-card">
+        <h3>Encryption Metadata</h3>
+        <div class="crypto-metadata">
+            <div class="meta-row">
+                <span class="meta-label">Encryption:</span>
+                <span class="meta-value">AES-256-GCM</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">AES Key Size:</span>
+                <span class="meta-value">256-bit</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Nonce:</span>
+                <span class="meta-value">{{ nonce_len }} bytes</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Authentication Tag:</span>
+                <span class="meta-value">{{ tag_len }} bytes</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Key Protection:</span>
+                <span class="meta-value">RSA-OAEP</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">RSA Key Size:</span>
+                <span class="meta-value">{% if rsa_key_size %}{{ rsa_key_size }}-bit{% else %}Configured RSA Key{% endif %}</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Encrypted AES Key Size:</span>
+                <span class="meta-value">{{ encrypted_key_len }} bytes</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Storage:</span>
+                <span class="meta-value">
+                    Encrypted ciphertext (.enc) — <code>{{ storage_filename }}</code>
+                    {% if enc_file_exists %}
+                    <span class="crypto-check ok">✓ On disk ({{ (enc_file_size / 1024)|round(1) }} KB)</span>
+                    {% else %}
+                    <span class="crypto-check fail">✗ File missing on disk</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="security-footer-actions">
+        <a href="{{ url_for('documents.dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+        <a href="{{ url_for('documents.cryptography_lab', doc_id=document.id) }}" class="btn btn-primary">🧪 Experiment in Cryptography Lab →</a>
+    </div>
+</div>
+{% endblock %}

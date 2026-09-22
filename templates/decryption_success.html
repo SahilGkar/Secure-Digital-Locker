@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Document Access - {{ document.original_filename }} - Secure Digital Locker{% endblock %}
+
+{% block content %}
+<div class="form-container decryption-status-container">
+    <h2>Document Access</h2>
+    <p class="decryption-file-info">
+        <strong>{{ document.original_filename }}</strong>
+        {% if document.document_type %}
+            — {{ document.document_type }}
+        {% endif %}
+    </p>
+
+    <div class="decryption-steps">
+        {% for step in steps %}
+        <div class="decryption-step {{ 'step-ok' if step.ok else 'step-fail' }}">
+            {% if step.ok %}
+                <span class="step-icon">✓</span>
+            {% else %}
+                <span class="step-icon">✗</span>
+            {% endif %}
+            <span class="step-text">{{ step.step }}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if success %}
+        <div class="decryption-result decryption-ok">
+            <p><strong>Status: DOCUMENT DECRYPTED ✓</strong></p>
+        </div>
+
+        <div class="decryption-actions">
+            {% if action == 'view' %}
+                <a href="{{ url_for('documents.serve', doc_id=document.id, token=serve_token) }}" class="btn btn-primary">
+                    View Document
+                </a>
+            {% else %}
+                <a href="{{ url_for('documents.serve', doc_id=document.id, token=serve_token) }}" class="btn btn-primary">
+                    Download Document
+                </a>
+            {% endif %}
+            <p class="serve-token-hint">
+                This access link is one-time use and expires in 30 seconds.
+            </p>
+        </div>
+    {% else %}
+        <div class="decryption-result decryption-fail">
+            <p><strong>Status: DECRYPTION FAILED ✗</strong></p>
+        </div>
+    {% endif %}
+
+    <p class="form-link">
+        <a href="{{ url_for('documents.dashboard') }}">← Back to Dashboard</a>
+    </p>
+</div>
+{% endblock %}
