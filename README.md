@@ -2,7 +2,7 @@
 
 A secure web-based digital locker that allows users to store documents using AES-256-GCM encryption with RSA-OAEP protected document keys, while providing an interactive Cryptography Lab for demonstrating encryption, decryption, and tamper detection.
 
-Developed as a second-year BSc Artificial Intelligence / Computer Science Cryptography project demonstrating applied symmetric and asymmetric cryptosystems.
+Developed as a second-year BSc Artificial Intelligence Cryptography project demonstrating applied symmetric and asymmetric cryptosystems.
 
 ---
 
