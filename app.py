@@ -20,6 +20,8 @@ def create_app():
         return redirect(url_for('auth.login'))
     
     with app.app_context():
+        from auth.models import User
+        from documents.models import Document
         db.create_all()
         from crypto.rsa_engine import initialize_keys
         initialize_keys()

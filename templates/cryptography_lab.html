@@ -5,13 +5,13 @@
 {% block content %}
 <div class="crypto-lab-page">
     <div class="page-header">
-        <h2>🧪 Cryptography Laboratory</h2>
+        <h2>Cryptography Laboratory</h2>
         <p class="subtitle">Interactive educational experiments demonstrating real AES-256-GCM and RSA-OAEP operations on temporary in-memory copies.</p>
     </div>
 
     <!-- Security Guarantee Banner -->
     <div class="alert alert-info lab-banner">
-        <strong>🛡️ In-Memory Isolation:</strong> All experiments operate strictly on temporary in-memory copies. Your real stored encrypted document (<code>.enc</code>) on disk is never modified, overwritten, or exposed.
+        <strong>In-Memory Isolation:</strong> All experiments operate strictly on temporary in-memory copies. Your real stored encrypted document (<code>.enc</code>) on disk is never modified, overwritten, or exposed.
     </div>
 
     <!-- ═══════════════════════════════════════════════════════ -->
@@ -44,7 +44,7 @@
 
             <!-- PIN Access Authentication Box -->
             <div class="lab-auth-box" id="lab-auth-container">
-                <h4>🔐 Locker PIN Authentication Required</h4>
+                <h4>Locker PIN Authentication Required</h4>
                 <p>To safely prepare the temporary in-memory laboratory copy, enter your 6-digit Locker PIN:</p>
                 <div class="pin-inline-form">
                     <input type="password" id="lab-pin-input" class="pin-input" placeholder="6-digit PIN" maxlength="6" pattern="[0-9]{6}" autocomplete="off">
@@ -78,7 +78,7 @@
                 <h3>EXPERIMENT 1: Encryption &amp; Decryption Demonstration</h3>
                 <div class="mode-toggles">
                     <button type="button" id="mode-normal-btn" class="btn btn-sm btn-toggle active">Normal Mode</button>
-                    <button type="button" id="mode-step-btn" class="btn btn-sm btn-toggle">🎓 Step-by-Step Demo Mode</button>
+                    <button type="button" id="mode-step-btn" class="btn btn-sm btn-toggle">Step-by-Step Demo Mode</button>
                 </div>
             </div>
 
@@ -86,7 +86,7 @@
             <div id="view-normal-mode">
                 <p>Execute the complete cryptographic pipeline on the temporary in-memory copy: fresh AES-256 key generation, AES-256-GCM encryption, RSA-OAEP key protection, and GCM authenticated decryption.</p>
                 <div class="exp-actions">
-                    <button type="button" id="btn-run-normal" class="btn btn-primary">▶ Run Cryptographic Round-Trip</button>
+                    <button type="button" id="btn-run-normal" class="btn btn-primary">Run Cryptographic Round-Trip</button>
                 </div>
                 
                 <div id="normal-results" class="results-panel" style="display:none;">
@@ -179,7 +179,7 @@
                     </div>
 
                     <div class="tamper-action-buttons">
-                        <button type="button" id="btn-test-decrypt" class="btn btn-primary">🔍 Test Decryption</button>
+                        <button type="button" id="btn-test-decrypt" class="btn btn-primary">Test Decryption</button>
                         <button type="button" id="btn-restore-byte" class="btn btn-secondary">Restore Original</button>
                     </div>
 

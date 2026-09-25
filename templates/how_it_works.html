@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}How It Works - Cryptographic Architecture - Secure Digital Locker{% endblock %}
+{% block title %}How It Works — Secure Digital Locker{% endblock %}
 
 {% block content %}
 <div class="how-it-works-page">
     <div class="page-header">
-        <h2>🛡️ How It Works: Cryptographic Architecture</h2>
-        <p class="subtitle">An educational guide to the hybrid encryption architecture used in Secure Digital Locker.</p>
+        <h2>How It Works</h2>
+        <p class="subtitle">An overview of the hybrid encryption architecture used to protect your documents.</p>
     </div>
 
     <!-- 1. Hybrid Encryption Overview -->
@@ -19,7 +19,7 @@
             <div class="info-box">
                 <h4>Why Symmetric Encryption for the Document?</h4>
                 <p>
-                    Symmetric ciphers like AES are exceptionally fast, computationally lightweight, and designed to encrypt data of any size (from small text files to large media) efficiently without ciphertext expansion.
+                    Symmetric ciphers like AES are exceptionally fast, computationally lightweight, and designed to encrypt data of any size efficiently without ciphertext expansion.
                 </p>
             </div>
             <div class="info-box">
@@ -160,7 +160,7 @@
             Even if an attacker changes a single byte or single bit of the ciphertext, the computed authentication tag will no longer match the stored tag, causing AES-GCM decryption to fail immediately and reject the corrupted data.
         </div>
         <div class="lab-link-card">
-            <h4>🧪 See it in action in the Cryptography Lab</h4>
+            <h4>See it in action in the Cryptography Lab</h4>
             <p>You can interactively modify bytes of ciphertext and observe AES-GCM detect tampering in real time.</p>
             <a href="{{ url_for('documents.cryptography_lab') }}" class="btn btn-primary">Open Cryptography Lab →</a>
         </div>

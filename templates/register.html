@@ -1,35 +1,177 @@
 {% extends "base.html" %}
 
-{% block title %}Register - Secure Digital Locker{% endblock %}
+{% block title %}Register — Secure Digital Locker{% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <h2>Register</h2>
-    <form method="POST" action="{{ url_for('auth.register') }}">
+<div class="register-container">
+    <!-- Step 1: Account Details -->
+    <div class="register-step active" id="register-step-1">
+        <h2>Create Account</h2>
+        <p class="step-indicator">Step 1 of 2</p>
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" required autocomplete="username">
+            <input type="text" id="username" name="username" required autocomplete="username" placeholder="Choose a username">
         </div>
         <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" required autocomplete="new-password" minlength="8">
+            <input type="password" id="password" name="password" required autocomplete="new-password" minlength="8" placeholder="Minimum 8 characters">
             <small>Minimum 8 characters</small>
         </div>
         <div class="form-group">
             <label for="confirm_password">Confirm Password</label>
-            <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password">
+            <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password" placeholder="Re-enter your password">
+            <div class="register-error" id="step1-error"></div>
         </div>
+        <div class="register-actions">
+            <button type="button" class="btn btn-primary" id="btn-step1-continue" style="width:100%;">Continue</button>
+        </div>
+    </div>
+
+    <!-- Step 2: Locker PIN -->
+    <div class="register-step" id="register-step-2">
+        <h2>Secure Your Locker</h2>
+        <p class="step-indicator">Step 2 of 2</p>
         <div class="form-group">
-            <label for="pin">6-Digit Locker PIN</label>
-            <input type="password" id="pin" name="pin" required pattern="[0-9]{6}" minlength="6" maxlength="6" inputmode="numeric">
+            <label for="pin">Create a 6-digit Locker PIN</label>
+            <input type="password" id="pin" name="pin" required pattern="[0-9]{6}" minlength="6" maxlength="6" inputmode="numeric" placeholder="6-digit PIN" autocomplete="off">
             <small>Used to unlock documents. Must be exactly 6 digits.</small>
         </div>
         <div class="form-group">
             <label for="confirm_pin">Confirm Locker PIN</label>
-            <input type="password" id="confirm_pin" name="confirm_pin" required pattern="[0-9]{6}" minlength="6" maxlength="6" inputmode="numeric">
+            <input type="password" id="confirm_pin" name="confirm_pin" required pattern="[0-9]{6}" minlength="6" maxlength="6" inputmode="numeric" placeholder="Re-enter your PIN" autocomplete="off">
+            <div class="register-error" id="step2-error"></div>
         </div>
-        <button type="submit" class="btn btn-primary">Register</button>
-    </form>
-    <p class="form-link">Already have an account? <a href="{{ url_for('auth.login') }}">Login</a></p>
+        <div class="register-actions">
+            <button type="button" class="btn btn-secondary" id="btn-step2-back">Back</button>
+            <button type="button" class="btn btn-primary" id="btn-step2-submit">Create Account</button>
+        </div>
+    </div>
+
+    <p class="form-link">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
 </div>
+
+<!-- Hidden form for actual submission -->
+<form method="POST" action="{{ url_for('auth.register') }}" id="register-form" style="display:none;">
+    <input type="hidden" name="username" id="form-username">
+    <input type="hidden" name="password" id="form-password">
+    <input type="hidden" name="pin" id="form-pin">
+    <input type="hidden" name="confirm_pin" id="form-confirm-pin">
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    const step1 = document.getElementById('register-step-1');
+    const step2 = document.getElementById('register-step-2');
+    const btnContinue = document.getElementById('btn-step1-continue');
+    const btnBack = document.getElementById('btn-step2-back');
+    const btnSubmit = document.getElementById('btn-step2-submit');
+    const step1Error = document.getElementById('step1-error');
+    const step2Error = document.getElementById('step2-error');
+
+    // Input fields
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const pinInput = document.getElementById('pin');
+    const confirmPinInput = document.getElementById('confirm_pin');
+
+    // Hidden form fields
+    const formUsername = document.getElementById('form-username');
+    const formPassword = document.getElementById('form-password');
+    const formPin = document.getElementById('form-pin');
+    const formConfirmPin = document.getElementById('form-confirm-pin');
+    const registerForm = document.getElementById('register-form');
+
+    function showError(el, msg) {
+        el.textContent = msg;
+        el.classList.add('visible');
+    }
+
+    function hideError(el) {
+        el.textContent = '';
+        el.classList.remove('visible');
+    }
+
+    // Step 1 → Step 2
+    btnContinue.addEventListener('click', function() {
+        hideError(step1Error);
+
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (!username) {
+            showError(step1Error, 'Username is required.');
+            usernameInput.focus();
+            return;
+        }
+        if (password.length < 8) {
+            showError(step1Error, 'Password must be at least 8 characters.');
+            passwordInput.focus();
+            return;
+        }
+        if (password !== confirmPassword) {
+            showError(step1Error, 'Passwords do not match.');
+            confirmPasswordInput.focus();
+            return;
+        }
+
+        step1.classList.remove('active');
+        step2.classList.add('active');
+        pinInput.focus();
+    });
+
+    // Step 2 → Step 1
+    btnBack.addEventListener('click', function() {
+        hideError(step2Error);
+        step2.classList.remove('active');
+        step1.classList.add('active');
+    });
+
+    // Submit
+    btnSubmit.addEventListener('click', function() {
+        hideError(step2Error);
+
+        const pin = pinInput.value.trim();
+        const confirmPin = confirmPinInput.value.trim();
+
+        if (!/^[0-9]{6}$/.test(pin)) {
+            showError(step2Error, 'PIN must be exactly 6 digits.');
+            pinInput.focus();
+            return;
+        }
+        if (pin !== confirmPin) {
+            showError(step2Error, 'PINs do not match.');
+            confirmPinInput.focus();
+            return;
+        }
+
+        // Populate hidden form and submit
+        formUsername.value = usernameInput.value.trim();
+        formPassword.value = passwordInput.value;
+        formPin.value = pin;
+        formConfirmPin.value = confirmPin;
+        registerForm.submit();
+    });
+
+    // Allow Enter key progression
+    confirmPasswordInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') btnContinue.click();
+    });
+    passwordInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') btnContinue.click();
+    });
+    usernameInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') btnContinue.click();
+    });
+    confirmPinInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') btnSubmit.click();
+    });
+    pinInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') confirmPinInput.focus();
+    });
+})();
+</script>
 {% endblock %}

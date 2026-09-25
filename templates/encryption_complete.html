@@ -1,8 +1,8 @@
 {# Included in dashboard.html when last_encryption data is available #}
 <div class="encryption-complete">
     <div class="encryption-complete-header">
-        <span class="encryption-complete-icon">🔐</span>
-        <h3>ENCRYPTION COMPLETE ✓</h3>
+        <span class="encryption-complete-icon">✓</span>
+        <h3>ENCRYPTION COMPLETE</h3>
     </div>
     <div class="encryption-complete-body">
         <div class="encryption-pipeline-status">
@@ -51,7 +51,7 @@
                 <tr><td>Ciphertext size:</td><td>{{ (last_encryption.ciphertext_size / 1024)|round(1) }} KB</td></tr>
                 <tr><td>Document type:</td><td>{{ last_encryption.document_type }}</td></tr>
             </table>
-            <p class="encryption-complete-status"><strong>Status: DOCUMENT ENCRYPTED ✓</strong></p>
+            <p class="encryption-complete-status"><strong>Status: Document Encrypted</strong></p>
         </div>
     </div>
 </div>

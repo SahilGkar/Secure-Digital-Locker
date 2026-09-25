@@ -5,7 +5,7 @@
 {% block content %}
 <div class="security-details">
     <div class="security-details-header">
-        <h2>🔐 Security Details: {{ document.original_filename }}</h2>
+        <h2>Security Details: {{ document.original_filename }}</h2>
         <a href="{{ url_for('documents.dashboard') }}" class="btn btn-secondary btn-sm">← Back to Dashboard</a>
     </div>
 
@@ -90,7 +90,7 @@
 
     <div class="security-footer-actions">
         <a href="{{ url_for('documents.dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
-        <a href="{{ url_for('documents.cryptography_lab', doc_id=document.id) }}" class="btn btn-primary">🧪 Experiment in Cryptography Lab →</a>
+        <a href="{{ url_for('documents.cryptography_lab', doc_id=document.id) }}" class="btn btn-primary">Experiment in Cryptography Lab →</a>
     </div>
 </div>
 {% endblock %}

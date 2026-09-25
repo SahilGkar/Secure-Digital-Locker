@@ -185,9 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!labToken) return;
 
             btnRunNormal.disabled = true;
-            btnRunNormal.textContent = '⏳ Executing Cryptographic Pipeline...';
+            btnRunNormal.textContent = 'Executing Cryptographic Pipeline...';
             normalResults.style.display = 'block';
-            normalStepsList.innerHTML = '<li>🔐 Running in-memory encryption &amp; decryption pipeline...</li>';
+            normalStepsList.innerHTML = '<li>Running in-memory encryption &amp; decryption pipeline...</li>';
             normalFinalStatus.style.display = 'none';
 
             try {
@@ -202,20 +202,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!resp.ok || !data.success) {
                     normalStepsList.innerHTML = `<li class="step-fail">✗ Error: ${data.error || 'Execution failed'}</li>`;
                     btnRunNormal.disabled = false;
-                    btnRunNormal.textContent = '▶ Run Cryptographic Round-Trip';
+                    btnRunNormal.textContent = 'Run Cryptographic Round-Trip';
                     return;
                 }
 
                 // Render execution steps
                 normalStepsList.innerHTML = '';
-                const icons = ['📄', '🔑', '🔒', '🛡️', '🔏', '🔓', '✅'];
 
                 data.steps.forEach((st, idx) => {
                     const li = document.createElement('li');
                     li.className = 'step-item';
                     li.innerHTML = `
                         <span class="step-num">${idx + 1}</span>
-                        <span class="step-icon">${icons[idx] || '✓'}</span>
                         <span class="step-text">${st.text}</span>
                         <span class="step-ok">✓ Completed</span>
                     `;
@@ -240,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 normalStepsList.innerHTML = '<li class="step-fail">✗ Network error executing round-trip.</li>';
             } finally {
                 btnRunNormal.disabled = false;
-                btnRunNormal.textContent = '▶ Run Cryptographic Round-Trip';
+                btnRunNormal.textContent = 'Run Cryptographic Round-Trip';
             }
         });
     }
@@ -252,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!labToken) return;
 
         btnNextStep.disabled = true;
-        btnNextStep.textContent = '⏳ Executing Stage...';
+        btnNextStep.textContent = 'Executing Stage...';
 
         try {
             const resp = await fetch('/cryptography-lab/step', {
@@ -376,7 +374,7 @@ Ciphertext + Nonce + Tag + AES Key  ───►  AES-256-GCM  ───►  Rec
                     <div class="step-status-tag ok">✓ Plaintext recovered</div>
                     <div class="step-status-tag ok">✓ Recovered data matches original temporary data</div>
                     <div class="final-status-callout status-success" style="margin-top: 15px;">
-                        <div class="status-title">STATUS: 🔐 CRYPTOGRAPHIC ROUND TRIP SUCCESSFUL</div>
+                        <div class="status-title">STATUS: CRYPTOGRAPHIC ROUND TRIP SUCCESSFUL</div>
                         <div class="status-sub">All 7 cryptographic stages executed successfully in memory with full integrity verification.</div>
                     </div>
                 </div>
@@ -620,7 +618,7 @@ Ciphertext + Nonce + Tag + AES Key  ───►  AES-256-GCM  ───►  Rec
             if (!labToken) return;
 
             btnTestDecrypt.disabled = true;
-            btnTestDecrypt.textContent = '⏳ Verifying AES-GCM Authentication...';
+            btnTestDecrypt.textContent = 'Verifying AES-GCM Authentication...';
 
             try {
                 const resp = await fetch('/cryptography-lab/test-decryption', {
@@ -636,7 +634,7 @@ Ciphertext + Nonce + Tag + AES Key  ───►  AES-256-GCM  ───►  Rec
                 if (data.authenticated) {
                     // Success!
                     decryptionTestResult.className = 'decryption-result-box result-success';
-                    decryptionStatusIcon.innerHTML = '🛡️ ✓';
+                    decryptionStatusIcon.innerHTML = '✓';
                     decryptionStatusText.innerHTML = `
                         <strong>Authentication Successful</strong>
                         <p>${data.message}</p>
@@ -647,7 +645,7 @@ Ciphertext + Nonce + Tag + AES Key  ───►  AES-256-GCM  ───►  Rec
                 } else {
                     // Tamper detected!
                     decryptionTestResult.className = 'decryption-result-box result-failed';
-                    decryptionStatusIcon.innerHTML = '⚠️ ✗';
+                    decryptionStatusIcon.innerHTML = '✗';
                     decryptionStatusText.innerHTML = `
                         <strong>Authentication Failed</strong>
                         <p>${data.message}</p>
@@ -664,7 +662,7 @@ Ciphertext + Nonce + Tag + AES Key  ───►  AES-256-GCM  ───►  Rec
                 decryptionStatusText.innerHTML = `<strong>Error:</strong> Failed to test decryption.`;
             } finally {
                 btnTestDecrypt.disabled = false;
-                btnTestDecrypt.textContent = '🔍 Test Decryption';
+                btnTestDecrypt.textContent = 'Test Decryption';
             }
         });
     }
